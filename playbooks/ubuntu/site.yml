@@ -1,0 +1,6 @@
+---
+- hosts: all
+  become: true
+
+  roles:
+    - { role: cgroup_enable_memory, tags: cgroup_enable_memory }
