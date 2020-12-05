@@ -1,0 +1,27 @@
+---
+- hosts: all
+  become: true
+
+  tasks:
+    - name: Disable Swap on Raspberry Pi
+      tags: disable_rasp_swap
+      lineinfile:
+        path: /etc/dphys-swapfile
+        regexp: '^CONF_SWAPSIZE='
+        line: CONF_SWAPSIZE=0
+      when: disable_rasp_swap is defined
+
+    - name: Disable swap on Ubuntu
+      tags: disable_ubuntu_swap
+      command: "{{ item }}"
+      with_items: 
+        - 'swapoff -a'
+        - "sed -i '/ swap / s/^/#/' /etc/fstab" #  Consider using the replace, lineinfile or template module rather than running 'sed'
+      when: ansible_distribution == 'Ubuntu'
+
+    - name: Reboot the machines
+      reboot:
+        reboot_timeout: 120
+
+    - name: Waiting for server to come back up
+      local_action: wait_for host="{{ inventory_hostname_short }}" port=22 state=started

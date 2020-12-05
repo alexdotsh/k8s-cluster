@@ -1,0 +1,22 @@
+---
+- hosts: all
+  become: true
+
+  tasks:
+    - name: 'Updating apt'
+      apt:
+        update_cache: yes
+
+    - name: Installing necessary packages
+      apt:
+        pkg:
+          - 'apt-transport-https'
+          - 'ca-certificates'
+          - 'software-properties-common'
+          - 'gnupg2'
+          - 'vim'
+          - 'curl'
+          - 'bash-completion'
+          - 'net-tools'
+        state: latest
+        update_cache: yes

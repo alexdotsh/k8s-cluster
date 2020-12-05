@@ -1,0 +1,26 @@
+---
+- hosts: all
+  become: true
+
+  tasks:
+    - name: Unistalling packages
+      apt:
+        pkg:
+          - 'apt-transport-https'
+          - 'ca-certificates'
+          - 'software-properties-common'
+          - 'gnupg2'
+          - 'vim'
+          - 'tree'
+          - 'curl'
+          - 'bash-completion'
+        state: absent
+        purge: yes
+        autoremove: yes
+        autoclean: yes
+
+    - name: Remove tmpfs mounts
+      lineinfile:
+        path: /etc/fstab
+        line: 'none            /var/log            tmpfs   size=1M,noatime             0   0'
+        state: absent
