@@ -1,0 +1,94 @@
+---
+- name: Remove Kubernetes GPG apt-key
+  apt_key:
+    id: "{{ kubernetes_gpg }}"
+    url: 'https://packages.cloud.google.com/apt/doc/apt-key.gpg'
+    state: absent
+
+- name: Remove kubernetes repository
+  apt_repository:
+    repo: "deb https://apt.kubernetes.io/ {{ kubernetes_repository }} main"
+    state: absent
+
+- dpkg_selections:
+    name: kubelet
+    selection: purge
+
+- dpkg_selections:
+    name: kubeadm
+    selection: purge
+
+- dpkg_selections:
+    name: kubectl
+    selection: purge
+
+- name: Unistalling kubelet, kubeadm, and kubectl
+  apt:
+    name: [ 'kubelet', 'kubeadm', 'kubectl', 'kubernetes-cni' ]
+    state: absent
+    purge: yes
+    autoremove: yes
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+
+- name: Remove useless packages from the cache
+  apt:
+    autoclean: yes
+
+- name: Remove dependencies that are no longer required
+  apt:
+    autoremove: yes
+
+- name: Remove /etc/kubernetes directory
+  file:
+    path: /etc/kubernetes
+    state: absent
+
+- name: Remove /usr/libexec/kubernetes directory
+  file:
+    path: /usr/libexec/kubernetes
+    state: absent
+
+- name: Remove /var/lib/etcd directory
+  file:
+    path: /var/lib/etcd
+    state: absent
+
+- name: Remove /var/lib/kubelet directory
+  file:
+    path: /var/lib/kubelet
+    state: absent
+
+- name: Remove .kube directory
+  file:
+    path: "/home/{{ ansible_user }}/.kube"
+    state: absent
+
+- name: Remove control plane endpoint from /etc/hosts
+  lineinfile:
+    path: /etc/hosts
+    line: "{{ master_ip }}   {{ control_plane_endpoint }}"
+    state: absent
+
+- name: Removing bash auto-completion for kubectl
+  lineinfile:
+    path: "/home/{{ ansible_user }}/.bashrc"
+    line: 'source <(kubectl completion bash)'
+    state: absent
+
+- name: Reset iptables
+  command: "{{ item }}"
+  with_items: 
+    - 'iptables -F'
+    - 'iptables -t nat -F'
+    - 'iptables -t mangle -F'
+    - 'iptables -X'
+
+- name: Reboot the machines
+  reboot:
+    reboot_timeout: 120
+
+- name: Waiting for server to come back up
+  local_action: wait_for host="{{ inventory_hostname }}" port=22 state=started

@@ -1,0 +1,45 @@
+---
+- name: Adding Kubernetes GPG apt-key
+  apt_key:
+    id: "{{ kubernetes_gpg }}"
+    url: 'https://packages.cloud.google.com/apt/doc/apt-key.gpg'
+    state: present
+
+- name: Adding kubernetes repository
+  apt_repository:
+    repo: "deb https://apt.kubernetes.io/ {{ kubernetes_repository }} main"
+    state: present
+
+- name: Updating apt
+  apt:
+    update_cache: yes
+
+- name: Installing kubectl
+  apt:
+    name: "kubectl={{ kubectl_version }}"
+    state: present
+
+- name: Installing kubelet
+  apt:
+    name: "kubelet={{ kubelet_version }}"
+    state: present
+
+- name: Installing kubeadm
+  apt:
+    name: "kubeadm={{ kubeadm_version }}"
+    state: present
+
+# Prevent kubectl from being upgraded.
+- dpkg_selections:
+    name: kubectl
+    selection: hold
+
+# Prevent kubelet from being upgraded.
+- dpkg_selections:
+    name: kubelet
+    selection: hold
+
+# Prevent kubeadm from being upgraded.
+- dpkg_selections:
+    name: kubeadm
+    selection: hold

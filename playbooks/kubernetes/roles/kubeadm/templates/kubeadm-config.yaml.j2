@@ -1,0 +1,7 @@
+
+apiVersion: "{{ api_version }}"
+kind: ClusterConfiguration
+kubernetesVersion: "{{ kubernetes_version }}"
+controlPlaneEndpoint: "{{ control_plane_endpoint }}:{{ control_plane_endpoint_port }}"
+networking:
+  podSubnet: "{{ pod_subnet }}"

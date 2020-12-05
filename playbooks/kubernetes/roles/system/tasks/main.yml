@@ -1,0 +1,14 @@
+---
+- name: Create kube config dir
+  file:
+    path: "/home/{{ ansible_user }}/.kube"
+    owner: "{{ ansible_user | default(ansible_user_id) }}"
+    group: "{{ ansible_user | default(ansible_user_id) }}"
+    mode: 0750
+    state: directory
+
+- name: Enabling bash auto-completion for kubectl
+  lineinfile:
+    path: "/home/{{ ansible_user }}/.bashrc"
+    line: 'source <(kubectl completion bash)'
+    create: yes

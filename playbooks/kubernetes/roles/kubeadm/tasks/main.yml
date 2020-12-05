@@ -1,0 +1,36 @@
+---
+- name: Create config for kubeadm
+  template:
+    src: kubeadm-config.yaml.j2
+    dest: '/etc/kubernetes/kubeadm-config.yaml'
+  register: kubeadm_config
+
+- name: Running pre-flight checks for kubeadm init using a config file
+  command: 'kubeadm init phase preflight --config=/etc/kubernetes/kubeadm-config.yaml'
+  run_once: true
+  when: kubeadm_config is succeeded
+
+- name: Verifying connectivity to the gcr.io container image registry
+  command: 'kubeadm config images pull'
+  register: kubeadm_verify_connectivity
+
+- name: Running kubeadm --init
+  command: 'kubeadm init --config=/etc/kubernetes/kubeadm-config.yaml --upload-certs'
+  run_once: true
+  register: kubeadm_init
+  when: kubeadm_verify_connectivity is succeeded
+
+- name: Copy admin kubeconfig to $HOME/.kube/config
+  copy:
+    src: '/etc/kubernetes/admin.conf'
+    dest: "/home/{{ ansible_user }}/.kube/config"
+    remote_src: yes
+  register: copy_admin_kubeconfig
+
+- name: Change file ownership, group and permissions on $HOME/.kube/config
+  file:
+    path: "/home/{{ ansible_user }}/.kube/config"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0644'
+  when: copy_admin_kubeconfig is succeeded

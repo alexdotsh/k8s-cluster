@@ -1,0 +1,7 @@
+
+---
+- name: Update /etc/hosts with control plane endpoint
+  lineinfile:
+    path: /etc/hosts
+    line: "{{ master_ip }}   {{ control_plane_endpoint }}"
+    create: yes

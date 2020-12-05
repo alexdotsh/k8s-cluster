@@ -1,0 +1,15 @@
+kubernetes_gpg: 54A647F9048D5688D7DA2ABE6A030B21BA07F4FB
+kubernetes_repository: kubernetes-xenial
+
+kubelet_version: 1.18.3-00
+kubeadm_version: 1.18.3-00
+kubectl_version: 1.18.5-00
+
+# Kubeadm configurations
+api_version: kubeadm.k8s.io/v1beta2
+kubernetes_version: 1.18.3
+control_plane_endpoint: k8smaster
+control_plane_endpoint_port: 6443
+pod_subnet: 192.168.0.0/16
+
+master_ip: "{{ hostvars[groups['masters'][0]]['ansible_default_ipv4'].address | default(groups['master'][0]) }}"

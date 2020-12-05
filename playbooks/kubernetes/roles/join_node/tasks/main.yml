@@ -1,0 +1,13 @@
+- name:
+  debug:
+    msg: "[Worker] k8s_token_holder K8S token is {{ hostvars['k8s_token_holder']['token'] }}"
+
+- name:
+  debug:
+    msg: "[Worker] k8s_token_holder K8S Hash is  {{ hostvars['k8s_token_holder']['hash'] }}"
+
+- name: kubeadmn join
+  shell: >
+    kubeadm join --token={{ hostvars['k8s_token_holder']['token'] }}
+    --discovery-token-ca-cert-hash sha256:{{ hostvars['k8s_token_holder']['hash'] }}
+    "{{ control_plane_endpoint }}:{{ control_plane_endpoint_port }}"
