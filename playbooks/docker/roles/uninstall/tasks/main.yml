@@ -1,0 +1,51 @@
+---
+- name: Unistalling docker-ce, docker-ce-cli and containerd.io
+  apt:
+    name: [ 'docker-ce', 'docker-ce-cli', 'containerd.io' ]
+    state: absent
+    purge: yes
+    autoremove: yes
+
+- name: Get Debian architecture
+  shell: dpkg --print-architecture
+  register: deb_architecture
+
+- name: Remove Docker Repository
+  apt_repository:
+    repo: "deb [arch={{ deb_architecture.stdout }}] https://download.docker.com/linux/{{ ansible_lsb.id | lower }} {{ ansible_distribution_release }} stable"
+    state: absent
+
+- name: Remove Docker GPG key
+  apt_key:
+    id: "{{ docker_gpg }}"
+    url: "https://download.docker.com/linux/{{ ansible_lsb.id | lower }}/gpg"
+    state: absent
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+
+- name: Remove useless packages from the cache
+  apt:
+    autoclean: yes
+
+- name: Remove dependencies that are no longer required
+  apt:
+    autoremove: yes
+
+- name: Remove /etc/docker directory
+  file:
+    path: /etc/docker
+    state: absent
+
+- name: Remove /var/lib/docker directory
+  file:
+    path: /var/lib/docker
+    state: absent
+
+- name: Reboot the machines
+  reboot:
+    reboot_timeout: 120
+
+- name: Waiting for server to come back up
+  local_action: wait_for host="{{ inventory_hostname }}" port=22 state=started

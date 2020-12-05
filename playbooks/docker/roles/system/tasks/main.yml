@@ -1,0 +1,21 @@
+---
+- name: Create config for docker
+  template:
+    src: docker-config.json.j2
+    dest: '/etc/docker/daemon.json'
+  register: docker_config
+
+- name: Create /etc/systemd/system/docker.service.d
+  file:
+    path: '/etc/systemd/system/docker.service.d'
+    mode: 0755
+    state: directory
+  when: docker_config.changed
+
+- name: Running systemctl daemon-reload
+  command: 'systemctl daemon-reload'
+  register: systemctl_daemon_reload
+
+- name: Restarting Docker
+  command: 'systemctl restart docker'
+  when: systemctl_daemon_reload is succeeded
