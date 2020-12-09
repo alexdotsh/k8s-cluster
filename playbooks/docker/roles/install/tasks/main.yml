@@ -19,17 +19,32 @@
   apt:
     update_cache: yes
 
+- name: Checking if docker-ce-cli is already installed
+  shell: "apt-cache policy docker-ce-cli | grep Installed: | awk '{print $2}'"
+  register: command_output
+
 - name: Installing docker-ce-cli
   apt:
     name: "docker-ce-cli={{ docker_ce_cli_version }}{{ ansible_lsb.id | lower }}-{{ ansible_distribution_release }}"
     state: present
+  when: command_output.stdout == '(none)'
+
+- name: Checking if containerd.io is already installed
+  shell: "apt-cache policy containerd.io | grep Installed: | awk '{print $2}'"
+  register: command_output
 
 - name: Installing containerd.io
   apt:
     name: "containerd.io={{ containerd_io_version }}"
     state: present
+  when: command_output.stdout == '(none)'
+
+- name: Checking if docker-ce is already installed
+  shell: "apt-cache policy docker-ce | grep Installed: | awk '{print $2}'"
+  register: command_output
 
 - name: Installing docker-ce
   apt:
     name: "docker-ce={{ docker_ce_version }}{{ ansible_lsb.id | lower }}-{{ ansible_distribution_release }}"
     state: present
+  when: command_output.stdout == '(none)'
