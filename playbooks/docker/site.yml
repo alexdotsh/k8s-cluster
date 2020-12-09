@@ -8,3 +8,5 @@
   roles:
     - { role: install, tags: docker_install }
     - { role: system, tags: docker_system }
+    - { role: upgrade, tags: docker_upgrade }
+    - { role: uninstall, tags: docker_uninstall }

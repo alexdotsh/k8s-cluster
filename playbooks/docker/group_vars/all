@@ -1,4 +1,4 @@
 docker_gpg: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
-docker_ce_version: 5:19.03.11~3-0~
 docker_ce_cli_version: 5:19.03.12~3-0~
 containerd_io_version: 1.2.13-2
+docker_ce_version: 5:19.03.11~3-0~
