@@ -1,0 +1,42 @@
+---
+- name: Updating apt
+  apt:
+    update_cache: yes
+
+- name: Getting current version of docker-ce-cli
+  shell: "apt-cache policy docker-ce-cli | grep Installed: | awk '{print $2}'"
+  register: command_output
+
+- name: Set full_docker_ce_cli_version
+  set_fact:
+    full_docker_ce_cli_version: "{{ docker_ce_cli_version }}{{ ansible_lsb.id | lower }}-{{ ansible_distribution_release }}"
+
+- name: Upgrading docker-ce-cli
+  apt:
+    name: "docker-ce-cli={{ full_docker_ce_cli_version }}"
+    state: present
+  when: command_output.stdout != full_docker_ce_cli_version
+
+- name: Getting current version of containerd.io
+  shell: "apt-cache policy containerd.io | grep Installed: | awk '{print $2}'"
+  register: command_output
+
+- name: Upgrading containerd.io
+  apt:
+    name: "containerd.io={{ containerd_io_version }}"
+    state: present
+  when: command_output.stdout != containerd_io_version
+
+- name: Getting current version of docker-ce
+  shell: "apt-cache policy docker-ce | grep Installed: | awk '{print $2}'"
+  register: command_output
+
+- name: Set full_docker_ce_version
+  set_fact:
+    full_docker_ce_version: "{{ docker_ce_version }}{{ ansible_lsb.id | lower }}-{{ ansible_distribution_release }}"
+
+- name: Upgrading docker-ce
+  apt:
+    name: "docker-ce={{ full_docker_ce_version }}"
+    state: present
+  when: command_output.stdout != full_docker_ce_version
