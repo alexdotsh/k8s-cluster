@@ -23,7 +23,7 @@
     selection: hold
 
 - name: Draining the node
-  shell: "kubectl drain {{ ansible_hostname }} --ignore-daemonsets"
+  shell: "kubectl drain {{ inventory_hostname_short }} --ignore-daemonsets"
 
 - name: Running apply upgrade on control plan node
   shell: "kubeadm upgrade apply {{ kubeadm_version | regex_replace('-0*','') }}"
@@ -78,4 +78,4 @@
   shell: "systemctl restart kubelet"
 
 - name: Uncordon the worker node
-  shell: "kubectl uncordon {{ ansible_hostname }}"
+  shell: "kubectl uncordon {{ inventory_hostname_short }}"
