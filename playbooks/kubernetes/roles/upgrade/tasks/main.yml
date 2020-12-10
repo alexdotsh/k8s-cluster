@@ -1,0 +1,64 @@
+---
+- name: Updating apt
+  apt:
+    update_cache: yes
+
+- name: Getting current version of kubectl
+  shell: "apt-cache policy kubectl | grep Installed: | awk '{print $2}'"
+  register: command_output
+
+- dpkg_selections:
+    name: kubectl
+    selection: install
+  when: command_output.stdout != kubectl_version
+
+- name: Upgrading kubectl
+  apt:
+    name: "kubectl={{ kubectl_version }}"
+    state: present
+  when: command_output.stdout != kubectl_version
+
+- name: Getting current version of kubelet
+  shell: "apt-cache policy kubelet | grep Installed: | awk '{print $2}'"
+  register: command_output
+
+- dpkg_selections:
+    name: kubelet
+    selection: install
+  when: command_output.stdout != kubelet_version
+
+- name: Upgrading kubelet
+  apt:
+    name: "kubelet={{ kubelet_version }}"
+    state: present
+  when: command_output.stdout != kubelet_version
+
+- name: Getting current version of kubeadm
+  shell: "apt-cache policy kubeadm | grep Installed: | awk '{print $2}'"
+  register: command_output
+
+- dpkg_selections:
+    name: kubeadm
+    selection: install
+  when: command_output.stdout != kubeadm_version
+
+- name: Upgrading kubeadm
+  apt:
+    name: "kubeadm={{ kubeadm_version }}"
+    state: present
+  when: command_output.stdout != kubeadm_version
+
+# Prevent kubectl from being upgraded after the upgrade
+- dpkg_selections:
+    name: kubectl
+    selection: hold
+
+# Prevent kubelet from being upgraded after the upgrade
+- dpkg_selections:
+    name: kubelet
+    selection: hold
+
+# Prevent kubeadm from being upgraded after the upgrade
+- dpkg_selections:
+    name: kubeadm
+    selection: hold
