@@ -37,3 +37,13 @@
 
   roles:
     - { role: join_node, tags: join_node }
+
+- hosts: all
+  become: true
+
+  vars_files:
+    - group_vars/all
+
+  roles:
+    - { role: reset, tags: reset }
+    - { role: uninstall, tags: uninstall }
