@@ -3,20 +3,35 @@
   apt:
     update_cache: yes
 
-- name: Getting current version of kubectl
-  shell: "apt-cache policy kubectl | grep Installed: | awk '{print $2}'"
+- name: Getting current version of kubeadm
+  shell: "apt-cache policy kubeadm | grep Installed: | awk '{print $2}'"
   register: command_output
 
 - dpkg_selections:
-    name: kubectl
+    name: kubeadm
     selection: install
-  when: command_output.stdout != kubectl_version
+  when: command_output.stdout != kubeadm_version
 
-- name: Upgrading kubectl
+- name: Installing new version of kubeadm
   apt:
-    name: "kubectl={{ kubectl_version }}"
+    name: "kubeadm={{ kubeadm_version }}"
     state: present
-  when: command_output.stdout != kubectl_version
+  when: command_output.stdout != kubeadm_version
+
+- dpkg_selections:
+    name: kubeadm
+    selection: hold
+
+- name: Draining the node
+  shell: "kubectl drain {{ ansible_hostname }} --ignore-daemonsets"
+
+- name: Running apply upgrade on control plan node
+  shell: "kubeadm upgrade apply {{ kubeadm_version | regex_replace('-0*','') }}"
+  when: "'masters' in group_names"
+
+- name: Upgrading the kubelet configuration on worker node
+  shell: "kubeadm upgrade node"
+  when: "'workers' in group_names"
 
 - name: Getting current version of kubelet
   shell: "apt-cache policy kubelet | grep Installed: | awk '{print $2}'"
@@ -27,38 +42,40 @@
     selection: install
   when: command_output.stdout != kubelet_version
 
-- name: Upgrading kubelet
+- name: Installing new version of kubelet
   apt:
     name: "kubelet={{ kubelet_version }}"
     state: present
   when: command_output.stdout != kubelet_version
 
-- name: Getting current version of kubeadm
-  shell: "apt-cache policy kubeadm | grep Installed: | awk '{print $2}'"
-  register: command_output
-
-- dpkg_selections:
-    name: kubeadm
-    selection: install
-  when: command_output.stdout != kubeadm_version
-
-- name: Upgrading kubeadm
-  apt:
-    name: "kubeadm={{ kubeadm_version }}"
-    state: present
-  when: command_output.stdout != kubeadm_version
-
-# Prevent kubectl from being upgraded after the upgrade
-- dpkg_selections:
-    name: kubectl
-    selection: hold
-
-# Prevent kubelet from being upgraded after the upgrade
 - dpkg_selections:
     name: kubelet
     selection: hold
 
-# Prevent kubeadm from being upgraded after the upgrade
+- name: Getting current version of kubectl
+  shell: "apt-cache policy kubectl | grep Installed: | awk '{print $2}'"
+  register: command_output
+
 - dpkg_selections:
-    name: kubeadm
+    name: kubectl
+    selection: install
+  when: command_output.stdout != kubectl_version
+
+- name: Installing new version of kubectl
+  apt:
+    name: "kubectl={{ kubectl_version }}"
+    state: present
+  when: command_output.stdout != kubectl_version
+
+- dpkg_selections:
+    name: kubectl
     selection: hold
+
+- name: Running daemon-reload
+  shell: "systemctl daemon-reload"
+
+- name: Restarting the kubelet
+  shell: "systemctl restart kubelet"
+
+- name: Uncordon the worker node
+  shell: "kubectl uncordon {{ ansible_hostname }}"
