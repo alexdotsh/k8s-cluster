@@ -40,6 +40,16 @@
 
 - hosts: all
   become: true
+  serial: 1
+
+  vars_files:
+    - group_vars/all
+
+  roles:
+    - { role: upgrade, tags: upgrade }
+
+- hosts: all
+  become: true
 
   vars_files:
     - group_vars/all
