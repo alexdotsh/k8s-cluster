@@ -29,7 +29,7 @@
   roles:
     - { role: generate_tokens, tags: generate_tokens }
 
-- hosts: slaves
+- hosts: workers
   become: true
 
   vars_files:
