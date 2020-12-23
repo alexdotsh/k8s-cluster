@@ -1,5 +1,5 @@
 ---
-- name: Running kubectl drain
+- name: Running kubectl drain on node
   become_user: "{{ ansible_user }}"
   command: "kubectl drain {{ ansible_hostname }} --delete-local-data --force --ignore-daemonsets"
   register: kubectl_drain
@@ -10,7 +10,7 @@
   register: kubectl_delete_node
   when: kubectl_drain is succeeded
 
-- name: Running kubeadm reset
+- name: Running kubeadm reset on node
   command: 'kubeadm reset -f'
   register: kubeadm_reset
   when: kubectl_delete_node is succeeded
