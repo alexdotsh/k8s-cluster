@@ -1,0 +1,4 @@
+---
+- name: Deleting Pod network on cluster
+  become_user: "{{ ansible_user }}"
+  shell: kubectl delete -f "https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml"

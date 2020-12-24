@@ -1,0 +1,12 @@
+---
+- name: Deleting CNI files
+  shell: "rm -f /opt/cni/bin/flannel*"
+
+- name: Deleting /etc/cni/net.d
+  shell: "rm -rf /etc/cni/net.d"
+
+- name: Running ifdown flannel
+  shell: "ifdown flannel.1"
+
+- name: Running ip link delete flannel
+  shell: "ip link delete flannel.1"

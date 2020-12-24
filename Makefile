@@ -33,23 +33,45 @@ install_kubernetes:
 	install_kubernetes_prerequisites
 	$(call docker_run_ansible_with_tags,kubernetes,site,"install,endpoint")
 
-build_cluster:
-	install_kubernetes
-	join_nodes
-
 join_nodes:
 	$(call docker_run_ansible_with_tags,kubernetes,site,"generate_tokens,join_node")
-
-join_new_node_to_existing_cluster:
-	install_kubernetes_prerequisites
-	$(call docker_run_ansible_with_tags,kubernetes,site,"install_other_nodes,endpoint_other_nodes,join_node_other_nodes")
 
 upgrade_kubernetes:
 	$(call docker_run_ansible_with_tags,kubernetes,site,"upgrade")
 
+kubeadm_reset_init:
+
 uninstall_kubernetes:
-	$(call docker_run_ansible_with_tags,kubernetes,cleanup,"cleanup")
+	$(call docker_run_ansible_with_tags,kubernetes,site,"uninstall")
 
 uninstall_docker:
-	$(call docker_run_ansible,docker,cleanup)
+	$(call docker_run_ansible_with_tags,docker,site,"uninstall")
 	$(call docker_run_ansible,utils,uninstall)
+
+install_weave_net:
+	$(call docker_run_ansible_with_tags,kubernetes,site,"add_weave_net")
+
+install_flannel:
+	$(call docker_run_ansible_with_tags,kubernetes,site,"add_flannel")
+
+delete_weave_net:
+	$(call docker_run_ansible_with_tags,kubernetes,site,"remove_weave_net_resources")
+	$(call docker_run_ansible_with_tags,kubernetes,site,"remove_weave_net_configs")
+
+delete_flannel:
+	$(call docker_run_ansible_with_tags,kubernetes,site,"remove_flannel_resources")
+	$(call docker_run_ansible_with_tags,kubernetes,site,"remove_flannel_configs")
+
+build_cluster_with_flannel:
+	install_kubernetes
+	join_nodes
+# system
+# kubeadm
+	install_flannel
+
+build_cluster_with_weave_net:
+	install_kubernetes
+	join_nodes
+# system
+# kubeadm
+	install_weave_net

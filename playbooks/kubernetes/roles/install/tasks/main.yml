@@ -14,6 +14,16 @@
   apt:
     update_cache: yes
 
+- name: Installing ifupdown
+  apt:
+    name: "ifupdown"
+    state: present
+
+- name: Installing netscript-2.4
+  apt:
+    name: "netscript-2.4"
+    state: present
+
 - name: Checking if kubectl is already installed
   shell: "apt-cache policy kubectl | grep Installed: | awk '{print $2}'"
   register: command_output

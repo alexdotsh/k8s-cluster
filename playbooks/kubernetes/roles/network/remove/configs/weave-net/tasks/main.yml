@@ -1,0 +1,12 @@
+---
+- name: Deleting CNI files
+  shell: "rm -f /opt/cni/bin/weave*"
+
+- name: Deleting /etc/cni/net.d
+  shell: "rm -rf /etc/cni/net.d"
+
+- name: Running ifdown weave
+  shell: "ifdown weave"
+
+- name: Running ip link delete weave
+  shell: "ip link delete weave"

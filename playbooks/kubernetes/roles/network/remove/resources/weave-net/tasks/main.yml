@@ -1,0 +1,4 @@
+---
+- name: Deleting Pod network on cluster
+  become_user: "{{ ansible_user }}"
+  shell: kubectl delete -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
