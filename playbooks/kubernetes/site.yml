@@ -29,7 +29,7 @@
   roles:
     - { role: generate_tokens, tags: generate_tokens }
 
-- hosts: workers
+- hosts: slaves
   become: true
 
   vars_files:
@@ -47,13 +47,5 @@
 
   roles:
     - { role: upgrade, tags: upgrade }
-
-- hosts: all
-  become: true
-
-  vars_files:
-    - group_vars/all
-
-  roles:
     - { role: reset, tags: reset }
     - { role: uninstall, tags: uninstall }

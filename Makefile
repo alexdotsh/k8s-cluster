@@ -40,6 +40,13 @@ build_cluster:
 join_nodes:
 	$(call docker_run_ansible_with_tags,kubernetes,site,"generate_tokens,join_node")
 
+join_new_node_to_existing_cluster:
+	install_kubernetes_prerequisites
+	$(call docker_run_ansible_with_tags,kubernetes,site,"install_other_nodes,endpoint_other_nodes,join_node_other_nodes")
+
+upgrade_kubernetes:
+	$(call docker_run_ansible_with_tags,kubernetes,site,"upgrade")
+
 uninstall_kubernetes:
 	$(call docker_run_ansible_with_tags,kubernetes,cleanup,"cleanup")
 

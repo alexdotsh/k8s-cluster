@@ -22,16 +22,40 @@
     name: kubeadm
     selection: hold
 
-- name: Draining the node
-  shell: "kubectl drain {{ inventory_hostname_short }} --ignore-daemonsets"
+- name: Draining the master node
+  shell: "kubectl drain {{ inventory_hostname_short }} --ignore-daemonsets --force --kubeconfig /etc/kubernetes/admin.conf"
+  when: "'masters' in group_names"
+
+- name: Getting admin config from master
+  shell: "cat /etc/kubernetes/admin.conf"
+  register: K8S_ADMIN_CONFIG
+  when: "'masters' in group_names"
+
+- name: Register dummy host with variable
+  add_host:
+    name: "k8s_config_host"
+    K8S_ADMIN_CONFIG: "{{ K8S_ADMIN_CONFIG.stdout }}"
+  when: "'masters' in group_names"
+
+- name: Adding config file to slave node
+  shell: "echo '{{ hostvars['k8s_config_host']['K8S_ADMIN_CONFIG'] }}' > /etc/kubernetes/admin.conf"
+  when: "'slaves' in group_names"
+
+- name: Draining the slave node
+  shell: "kubectl drain {{ inventory_hostname_short }} --ignore-daemonsets --force --kubeconfig /etc/kubernetes/admin.conf"
+  when: "'slaves' in group_names"
 
 - name: Running apply upgrade on control plan node
-  shell: "kubeadm upgrade apply {{ kubeadm_version | regex_replace('-0*','') }}"
+  shell: "kubeadm upgrade apply {{ kubeadm_version | regex_replace('-0*','') }} -y"
   when: "'masters' in group_names"
+
+# - name: Upgrading the kubelet configuration on worker node
+#   shell: "kubeadm upgrade node"
+#   when: "'masters' in group_names and not the first ip"
 
 - name: Upgrading the kubelet configuration on worker node
   shell: "kubeadm upgrade node"
-  when: "'workers' in group_names"
+  when: "'slaves' in group_names"
 
 - name: Getting current version of kubelet
   shell: "apt-cache policy kubelet | grep Installed: | awk '{print $2}'"
@@ -77,5 +101,5 @@
 - name: Restarting the kubelet
   shell: "systemctl restart kubelet"
 
-- name: Uncordon the worker node
-  shell: "kubectl uncordon {{ inventory_hostname_short }}"
+- name: Uncordon node
+  shell: "kubectl uncordon {{ inventory_hostname_short }} --kubeconfig /etc/kubernetes/admin.conf"

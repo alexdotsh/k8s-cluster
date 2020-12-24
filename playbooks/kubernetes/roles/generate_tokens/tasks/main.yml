@@ -25,4 +25,4 @@
 
 - name:
   debug:
-    msg: "[Master] k8s_token_holder K8S Hash is  {{ hostvars['k8s_token_holder']['hash'] }}"
+    msg: "[Master] k8s_token_holder K8S Hash is {{ hostvars['k8s_token_holder']['hash'] }}"
