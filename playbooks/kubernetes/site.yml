@@ -1,6 +1,6 @@
----
 - hosts: all
   become: true
+  gather_facts: false
 
   vars_files:
     - group_vars/all
@@ -9,8 +9,9 @@
     - { role: install, tags: install }
     - { role: endpoint, tags: endpoint }
 
-- hosts: masters
+- hosts: masters[0]
   become: true
+  gather_facts: false
 
   vars_files:
     - group_vars/all
@@ -18,10 +19,28 @@
   roles:
     - { role: system, tags: system }
     - { role: kubeadm, tags: kubeadm }
-    - { role: weave-net, tags: weave_net }
 
-- hosts: masters
+- hosts: masters[0]
   become: true
+  gather_facts: false
+
+  roles:
+    - { role: network/add/flannel, tags: add_flannel }
+    - { role: network/remove/resources/flannel, tags: remove_flannel_resources }
+    - { role: network/add/weave-net, tags: add_weave_net }
+    - { role: network/remove/resources/weave-net, tags: remove_weave_net_resources }
+
+- hosts: all
+  become: true
+  gather_facts: false
+
+  roles:
+    - { role: network/remove/configs/weave-net, tags: remove_weave_net_configs }
+    - { role: network/remove/configs/flannel, tags: remove_flannel_configs }
+
+- hosts: masters[0]
+  become: true
+  gather_facts: false
 
   vars_files:
     - group_vars/all
@@ -31,6 +50,7 @@
 
 - hosts: slaves
   become: true
+  gather_facts: false
 
   vars_files:
     - group_vars/all
@@ -40,6 +60,7 @@
 
 - hosts: all
   become: true
+  gather_facts: false
   serial: 1
 
   vars_files:
