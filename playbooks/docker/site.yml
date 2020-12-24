@@ -6,7 +6,7 @@
     - group_vars/all
 
   roles:
-    - { role: install, tags: docker_install }
-    - { role: system, tags: docker_system }
-    - { role: upgrade, tags: docker_upgrade }
-    - { role: uninstall, tags: docker_uninstall }
+    - { role: install, tags: install }
+    - { role: system, tags: system }
+    - { role: upgrade, tags: upgrade }
+    - { role: uninstall, tags: uninstall }
