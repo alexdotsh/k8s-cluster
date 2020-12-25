@@ -1,18 +1,24 @@
 ---
-- name: Deleting CNI files
+- name: Deleting CNI binary
   shell: "rm -f /opt/cni/bin/weave*"
+  args:
+    warn: no
 
-- name: Deleting /etc/cni/net.d
-  shell: "rm -rf /etc/cni/net.d"
+- name: Deleting /etc/cni/net.d directory
+  file:
+    path: /etc/cni/net.d
+    state: absent
 
 - name: Running ifdown weave
-  shell: "ifdown weave"
+  shell: "ifconfig weave down"
 
 - name: Running ip link delete weave
   shell: "ip link delete weave"
 
 - name: Stopping kubelet
-  shell: "service kubelet stop"
+  service:
+    name: kubelet
+    state: stopped
 
 - name: Cleaning up iptables rules
   shell: "iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X"
@@ -21,4 +27,6 @@
   shell: "ipvsadm -C"
 
 - name: Starting kubelet
-  shell: "service kubelet start"
+  service:
+    name: kubelet
+    state: started
