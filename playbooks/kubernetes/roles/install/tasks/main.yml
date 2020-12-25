@@ -14,6 +14,11 @@
   apt:
     update_cache: yes
 
+- name: Installing ipvsadm
+  apt:
+    name: "ipvsadm"
+    state: present
+
 - name: Installing ifupdown
   apt:
     name: "ifupdown"
