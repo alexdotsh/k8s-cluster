@@ -10,3 +10,9 @@
 
 - name: Running ip link delete weave
   shell: "ip link delete weave"
+
+- name: Cleaning up iptables rules
+  shell: "iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X"
+
+- name: Resetting the IPVS tables
+  shell: "ipvsadm -C"
