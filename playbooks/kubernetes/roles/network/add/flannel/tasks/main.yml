@@ -2,3 +2,7 @@
 - name: Installing Pod network on cluster
   become_user: "{{ ansible_user }}"
   shell: kubectl apply -f "https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml"
+
+- name: Recreating all pods to register with the new pod network
+  become_user: "{{ ansible_user }}"
+  shell: "for ns in $(kubectl get ns -o name | cut -f2 -d'/'); do kubectl delete pods -n $ns --all; done"
