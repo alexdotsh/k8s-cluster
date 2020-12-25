@@ -30,3 +30,6 @@
   service:
     name: kubelet
     state: started
+
+- name: Running systemctl daemon-reload
+  shell: "systemctl daemon-reload"

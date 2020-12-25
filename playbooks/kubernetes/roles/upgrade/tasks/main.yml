@@ -49,6 +49,7 @@
   shell: "kubeadm upgrade apply {{ kubeadm_version | regex_replace('-0*','') }} -y"
   when: "'masters' in group_names"
 
+# TODO for other masters
 # - name: Upgrading the kubelet configuration on worker node
 #   shell: "kubeadm upgrade node"
 #   when: "'masters' in group_names and not the first ip"
