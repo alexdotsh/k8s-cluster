@@ -11,8 +11,14 @@
 - name: Running ip link delete flannel
   shell: "ip link delete flannel.1"
 
+- name: Stopping kubelet
+  shell: "service kubelet stop"
+
 - name: Cleaning up iptables rules
   shell: "iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X"
 
 - name: Resetting the IPVS tables
   shell: "ipvsadm -C"
+
+- name: Starting kubelet
+  shell: "service kubelet start"
