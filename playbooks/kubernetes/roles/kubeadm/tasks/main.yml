@@ -1,4 +1,10 @@
 ---
+- name: Creating /etc/kubernetes directory
+  file:
+    path: /etc/kubernetes
+    state: directory
+    mode: '0755'
+
 - name: Create config for kubeadm
   template:
     src: kubeadm-config.yaml.j2
@@ -14,10 +20,14 @@
   command: 'kubeadm config images pull'
   register: kubeadm_verify_connectivity
 
+- name: Deleting /etc/kubernetes/admin.conf
+  file:
+    path: /etc/kubernetes/admin.conf
+    state: absent
+
 - name: Running kubeadm --init
   command: 'kubeadm init --config=/etc/kubernetes/kubeadm-config.yaml --upload-certs'
   run_once: true
-  register: kubeadm_init
   when: kubeadm_verify_connectivity is succeeded
 
 - name: Copy admin kubeconfig to $HOME/.kube/config

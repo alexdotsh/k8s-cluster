@@ -1,16 +1,43 @@
 ---
-- name: Running kubectl drain on node
-  become_user: "{{ ansible_user }}"
-  command: "kubectl drain {{ ansible_hostname }} --delete-local-data --force --ignore-daemonsets"
+- name: Draining the master node
+  shell: "kubectl drain {{ inventory_hostname_short }} --ignore-daemonsets --force --kubeconfig /etc/kubernetes/admin.conf"
+  when: "'masters' in group_names"
   register: kubectl_drain
 
-- name: Running kubectl delete node
-  become_user: "{{ ansible_user }}"
-  command: "kubectl delete node {{ ansible_hostname }}"
-  register: kubectl_delete_node
-  when: kubectl_drain is succeeded
+- name: Getting admin config from master
+  shell: "cat /etc/kubernetes/admin.conf"
+  register: K8S_ADMIN_CONFIG
+  when: "'masters' in group_names"
+
+- name: Register dummy host with variable
+  add_host:
+    name: "k8s_config_host"
+    K8S_ADMIN_CONFIG: "{{ K8S_ADMIN_CONFIG.stdout }}"
+  when: "'masters' in group_names"
+
+- name: Adding config file to slave node
+  shell: "echo '{{ hostvars['k8s_config_host']['K8S_ADMIN_CONFIG'] }}' > /etc/kubernetes/admin.conf"
+  when: "'slaves' in group_names"
+
+- name: Draining the slave node
+  shell: "kubectl drain {{ inventory_hostname_short }} --ignore-daemonsets --force --kubeconfig /etc/kubernetes/admin.conf"
+  when: "'slaves' in group_names"
+  register: kubectl_drain
 
 - name: Running kubeadm reset on node
   command: 'kubeadm reset -f'
   register: kubeadm_reset
-  when: kubectl_delete_node is succeeded
+  when: kubectl_drain is succeeded
+
+- name: Reset iptables
+  command: "{{ item }}"
+  with_items: 
+    - 'iptables -F'
+    - 'iptables -t nat -F'
+    - 'iptables -t mangle -F'
+    - 'iptables -X'
+    - 'ipvsadm -C'
+
+- name: Running kubectl delete node
+  command: "kubectl delete node {{ inventory_hostname_short }}"
+  when: kubeadm_reset is succeeded

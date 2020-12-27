@@ -1,0 +1,4 @@
+---
+- name: Deleting canal pod network on cluster
+  become_user: "{{ ansible_user }}"
+  shell: kubectl delete -f "https://docs.projectcalico.org/manifests/canal.yaml"

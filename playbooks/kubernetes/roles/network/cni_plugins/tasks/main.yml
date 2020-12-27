@@ -1,0 +1,15 @@
+---
+- name: Creating /opt/cni/bin directory
+  file:
+    path: /opt/cni/bin
+    state: directory
+
+- name: Pulling golang:latest image
+  shell: "timeout 5m docker pull golang:latest"
+  args:
+    warn: no
+
+- name: building cni plugins and copying to /opt/cni/bin directory
+  shell: docker run --rm --net=host -v=/opt/cni/bin:/opt/cni/bin golang:latest bash -c 'git clone https://github.com/containernetworking/plugins $GOPATH/src/github.com/containernetworking/plugins; cd $GOPATH/src/github.com/containernetworking/plugins; ./build_linux.sh; cp bin/* /opt/cni/bin'
+  args:
+    warn: no

@@ -1,8 +1,8 @@
 ---
-- name: Deleting CNI binary
-  shell: "rm -f /opt/cni/bin/weave*"
-  args:
-    warn: no
+- name: Deleting /opt/cni/bin directory
+  file:
+    path: /opt/cni/bin
+    state: absent
 
 - name: Deleting /etc/cni/net.d directory
   file:
@@ -33,3 +33,10 @@
 
 - name: Running systemctl daemon-reload
   shell: "systemctl daemon-reload"
+
+- name: Running systemctl daemon-reload
+  shell: "systemctl restart kubelet"
+
+- name: Recreating all pods
+  become_user: "{{ ansible_user }}"
+  shell: "for ns in $(kubectl get ns -o name | cut -f 2 -d '/'); do kubectl delete pods -n $ns --all; done"

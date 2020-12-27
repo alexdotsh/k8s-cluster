@@ -1,0 +1,14 @@
+---
+- name: Installing canal pod network on cluster
+  become_user: "{{ ansible_user }}"
+  shell: kubectl apply -f "https://docs.projectcalico.org/manifests/canal.yaml"
+
+- name: Stopping kubelet
+  service:
+    name: kubelet
+    state: stopped
+
+- name: Starting kubelet
+  service:
+    name: kubelet
+    state: started

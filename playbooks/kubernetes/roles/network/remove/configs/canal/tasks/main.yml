@@ -9,12 +9,6 @@
     path: /etc/cni/net.d
     state: absent
 
-- name: Running ifconfig flannel.1 down
-  shell: "ifconfig flannel.1 down"
-
-- name: Running ip link delete flannel
-  shell: "ip link delete flannel.1"
-
 - name: Stopping kubelet
   service:
     name: kubelet

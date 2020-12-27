@@ -1,6 +1,7 @@
 - hosts: all
   become: true
-  gather_facts: false
+  gather_facts: true
+  serial: 1
 
   vars_files:
     - group_vars/all
@@ -29,6 +30,8 @@
     - { role: network/remove/resources/flannel, tags: remove_flannel_resources }
     - { role: network/add/weave-net, tags: add_weave_net }
     - { role: network/remove/resources/weave-net, tags: remove_weave_net_resources }
+    - { role: network/add/canal, tags: add_canal }
+    - { role: network/remove/resources/canal, tags: remove_canal_resources }
 
 - hosts: all
   become: true
@@ -37,6 +40,8 @@
   roles:
     - { role: network/remove/configs/weave-net, tags: remove_weave_net_configs }
     - { role: network/remove/configs/flannel, tags: remove_flannel_configs }
+    - { role: network/remove/configs/canal, tags: remove_canal_configs }
+    - { role: network/cni_plugins, tags: build_cni_plugins }
 
 - hosts: masters[0]
   become: true
@@ -68,5 +73,36 @@
 
   roles:
     - { role: upgrade, tags: upgrade }
-    - { role: reset, tags: reset }
+
+- hosts: all
+  become: true
+  gather_facts: true
+  serial: 1
+
+  vars_files:
+    - group_vars/all
+
+  roles:
     - { role: uninstall, tags: uninstall }
+
+- hosts: slaves
+  become: true
+  gather_facts: false
+  serial: 1
+
+  vars_files:
+    - group_vars/all
+
+  roles:
+    - { role: reset, tags: reset_slave_nodes }
+
+- hosts: masters
+  become: true
+  gather_facts: false
+  serial: 1
+
+  vars_files:
+    - group_vars/all
+
+  roles:
+    - { role: reset, tags: reset_master_nodes }

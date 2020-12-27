@@ -22,6 +22,6 @@
 - name: Running systemctl daemon-reload
   shell: "systemctl daemon-reload"
 
-- name: Recreating all pods to register with the new pod network
+- name: Recreating all pods
   become_user: "{{ ansible_user }}"
   shell: "for ns in $(kubectl get ns -o name | cut -f 2 -d '/'); do kubectl delete pods -n $ns --all; done"

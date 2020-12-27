@@ -61,6 +61,16 @@
     path: /var/lib/kubelet
     state: absent
 
+- name: Deleting /opt/cni/bin directory
+  file:
+    path: /opt/cni/bin
+    state: absent
+
+- name: Deleting /etc/cni/net.d directory
+  file:
+    path: /etc/cni/net.d
+    state: absent
+
 - name: Remove .kube directory
   file:
     path: "/home/{{ ansible_user }}/.kube"
