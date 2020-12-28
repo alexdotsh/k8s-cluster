@@ -1,7 +1,12 @@
 ---
+- name: Copy canal.yaml to /etc/kubernetes
+  template:
+    src: arm64/canal.yaml
+    dest: '/etc/kubernetes/canal.yaml'
+
 - name: Installing canal pod network on cluster
   become_user: "{{ ansible_user }}"
-  shell: kubectl apply -f "https://docs.projectcalico.org/manifests/canal.yaml"
+  shell: kubectl apply -f /etc/kubernetes/canal.yaml
 
 - name: Stopping kubelet
   service:

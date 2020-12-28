@@ -1,9 +1,4 @@
 ---
-- name: Draining the master node
-  shell: "kubectl drain {{ inventory_hostname_short }} --ignore-daemonsets --force --kubeconfig /etc/kubernetes/admin.conf"
-  when: "'masters' in group_names"
-  register: kubectl_drain
-
 - name: Getting admin config from master
   shell: "cat /etc/kubernetes/admin.conf"
   register: K8S_ADMIN_CONFIG
@@ -19,15 +14,21 @@
   shell: "echo '{{ hostvars['k8s_config_host']['K8S_ADMIN_CONFIG'] }}' > /etc/kubernetes/admin.conf"
   when: "'slaves' in group_names"
 
-- name: Draining the slave node
-  shell: "kubectl drain {{ inventory_hostname_short }} --ignore-daemonsets --force --kubeconfig /etc/kubernetes/admin.conf"
+- name: Creating a copy of the config file
+  shell: "cp /etc/kubernetes/admin.conf /tmp/admin.conf"
   when: "'slaves' in group_names"
+
+- name: Draining the slave node
+  shell: "kubectl drain {{ inventory_hostname_short }} --delete-local-data --ignore-daemonsets --force --kubeconfig /etc/kubernetes/admin.conf"
   register: kubectl_drain
+  when: "'slaves' in group_names"
 
 - name: Running kubeadm reset on node
   command: 'kubeadm reset -f'
   register: kubeadm_reset
-  when: kubectl_drain is succeeded
+  when:
+    - kubectl_drain is succeeded
+    - "'slaves' in group_names"
 
 - name: Reset iptables
   command: "{{ item }}"
@@ -37,7 +38,10 @@
     - 'iptables -t mangle -F'
     - 'iptables -X'
     - 'ipvsadm -C'
+  when: "'slaves' in group_names"
 
 - name: Running kubectl delete node
-  command: "kubectl delete node {{ inventory_hostname_short }}"
-  when: kubeadm_reset is succeeded
+  command: "kubectl delete node {{ inventory_hostname_short }} --kubeconfig /tmp/admin.conf"
+  when:
+    - kubeadm_reset is succeeded
+    - "'slaves' in group_names"

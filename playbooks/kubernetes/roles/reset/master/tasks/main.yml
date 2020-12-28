@@ -1,0 +1,29 @@
+---
+- name: Draining the master node
+  shell: "kubectl drain {{ inventory_hostname_short }} --delete-local-data --ignore-daemonsets --force --kubeconfig /etc/kubernetes/admin.conf"
+  register: kubectl_drain
+  when: "'masters' in group_names"
+
+- name: Running kubeadm reset on node
+  command: 'kubeadm reset -f'
+  register: kubeadm_reset
+  when:
+    - kubectl_drain is succeeded
+    - "'masters' in group_names"
+
+- name: Reset iptables
+  command: "{{ item }}"
+  with_items: 
+    - 'iptables -F'
+    - 'iptables -t nat -F'
+    - 'iptables -t mangle -F'
+    - 'iptables -X'
+    - 'ipvsadm -C'
+  when: "'masters' in group_names"
+
+- name: Removing the copy of the config file from slave nodes
+  file:
+    path: /tmp/admin.conf
+    state: absent
+  when:
+    - "'slaves' in group_names"
