@@ -57,9 +57,6 @@ kubeadm_rejoin_nodes:
 kubeadm_upgrade:
 	$(call docker_run_ansible_with_tags,kubernetes,site,upgrade)
 
-kubeadm_reset_and_init:
-# TODO
-
 kubeadm_reset_slave_nodes:
 	$(call docker_run_ansible_with_tags,kubernetes,site,reset_slave_nodes)
 
@@ -69,6 +66,14 @@ kubeadm_reset_master_nodes:
 kubeadm_reset:
 	kubeadm_reset_slave_nodes
 	kubeadm_reset_master_nodes
+
+kubeadm_reset_and_init:
+	kubeadm_reset
+	kubeadm_init
+
+kubeadm_reset_and_init_and_join_nodes:
+	kubeadm_reset_and_init
+	kubeadm_join_nodes
 
 # Networking
 install_weave_net_pod_network:
