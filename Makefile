@@ -66,6 +66,10 @@ kubeadm_reset_slave_nodes:
 kubeadm_reset_master_nodes:
 	$(call docker_run_ansible_with_tags,kubernetes,site,reset_master_nodes)
 
+kubeadm_reset:
+	kubeadm_reset_slave_nodes
+	kubeadm_reset_master_nodes
+
 # Networking
 install_weave_net_pod_network:
 	$(call docker_run_ansible_with_tags,kubernetes,site,add_weave_net)
