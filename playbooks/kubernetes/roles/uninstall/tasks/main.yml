@@ -88,17 +88,19 @@
     line: 'source <(kubectl completion bash)'
     state: absent
 
-- name: Reset iptables
-  command: "{{ item }}"
-  with_items: 
-    - 'iptables -F'
-    - 'iptables -t nat -F'
-    - 'iptables -t mangle -F'
-    - 'iptables -X'
+# Slow raspberry pi login > disabled reboot for now
 
-- name: Reboot the machines
-  reboot:
-    reboot_timeout: 120
+# - name: Reset iptables
+#   command: "{{ item }}"
+#   with_items: 
+#     - 'iptables -F'
+#     - 'iptables -t nat -F'
+#     - 'iptables -t mangle -F'
+#     - 'iptables -X'
 
-- name: Waiting for server to come back up
-  local_action: wait_for host="{{ inventory_hostname }}" port=22 state=started
+# - name: Reboot the machines
+#   reboot:
+#     reboot_timeout: 120
+
+# - name: Waiting for server to come back up
+#   local_action: wait_for host="{{ inventory_hostname }}" port=22 state=started

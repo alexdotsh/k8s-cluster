@@ -1,11 +1,10 @@
+---
 - hosts: all
   become: true
   gather_facts: true
   serial: 1
-
   vars_files:
     - group_vars/all
-
   roles:
     - { role: install, tags: install }
     - { role: endpoint, tags: endpoint }
@@ -13,10 +12,8 @@
 - hosts: masters[0]
   become: true
   gather_facts: false
-
   vars_files:
     - group_vars/all
-
   roles:
     - { role: system, tags: system }
     - { role: kubeadm, tags: kubeadm }
@@ -24,7 +21,6 @@
 - hosts: masters[0]
   become: true
   gather_facts: false
-
   roles:
     - { role: network/add/flannel, tags: add_flannel }
     - { role: network/remove/resources/flannel, tags: remove_flannel_resources }
@@ -36,41 +32,18 @@
 - hosts: all
   become: true
   gather_facts: false
-
   roles:
     - { role: network/remove/configs/weave-net, tags: remove_weave_net_configs }
     - { role: network/remove/configs/flannel, tags: remove_flannel_configs }
     - { role: network/remove/configs/canal, tags: remove_canal_configs }
     - { role: network/cni_plugins, tags: build_cni_plugins }
 
-- hosts: masters[0]
-  become: true
-  gather_facts: false
-
-  vars_files:
-    - group_vars/all
-
-  roles:
-    - { role: generate_tokens, tags: generate_tokens }
-
-- hosts: slaves
-  become: true
-  gather_facts: false
-
-  vars_files:
-    - group_vars/all
-
-  roles:
-    - { role: join_node, tags: join_node }
-
 - hosts: all
   become: true
   gather_facts: false
   serial: 1
-
   vars_files:
     - group_vars/all
-
   roles:
     - { role: upgrade, tags: upgrade }
 
@@ -78,10 +51,8 @@
   become: true
   gather_facts: true
   serial: 1
-
   vars_files:
     - group_vars/all
-
   roles:
     - { role: uninstall, tags: uninstall }
 
@@ -89,10 +60,8 @@
   become: true
   gather_facts: false
   serial: 1
-
   vars_files:
     - group_vars/all
-
   roles:
     - { role: reset, tags: reset_slave_nodes }
 
@@ -100,9 +69,23 @@
   become: true
   gather_facts: false
   serial: 1
-
   vars_files:
     - group_vars/all
-
   roles:
     - { role: reset, tags: reset_master_nodes }
+
+- hosts: masters[0]
+  become: true
+  gather_facts: false
+  vars_files:
+    - group_vars/all
+  roles:
+    - { role: generate_tokens, tags: generate_tokens }
+
+- hosts: slaves
+  become: true
+  gather_facts: false
+  vars_files:
+    - group_vars/all
+  roles:
+    - { role: join_node, tags: join_node }
