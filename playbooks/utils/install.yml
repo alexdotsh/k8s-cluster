@@ -1,6 +1,7 @@
 ---
 - hosts: all
   become: true
+  serial: 1
 
   tasks:
     - name: Updating apt
@@ -18,4 +19,5 @@
           - 'curl'
           - 'bash-completion'
           - 'net-tools'
+          - 'ipvsadm'
         state: latest
