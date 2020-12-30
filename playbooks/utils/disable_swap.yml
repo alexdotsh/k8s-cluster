@@ -14,17 +14,12 @@
 
     - name: Disable swap on Ubuntu
       tags: disable_ubuntu_swap
-      command: "swapoff -a"
+      shell: "{{ item }}"
       with_items: 
         - 'swapoff -a'
-        - "sed -i '/swap/s/^/#/' /etc/fstab" #  Consider using the replace, lineinfile or template module rather than running 'sed'
+        - "sed -i '/swap/s/^/#/' /etc/fstab"
+      warn: false
       when: ansible_distribution == 'Ubuntu'
-
-    # - name: Disable swap on Ubuntu
-    #   lineinfile:
-    #     path: /etc/fstab
-    #     regexp: '^swap'
-    #     line: '#swap'
 
     - name: Reboot the machines
       reboot:

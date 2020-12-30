@@ -1,4 +1,9 @@
 ---
+- name: Create /boot/firmware directory
+  file:
+    path: /boot/firmware
+    state: directory
+
 - name: Enable cgroup memory
   template:
     src: cmdline
