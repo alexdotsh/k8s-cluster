@@ -1,0 +1,14 @@
+---
+- name: Reset iptables
+  command: "{{ item }}"
+  with_items: 
+    - 'iptables -F'
+    - 'iptables -t nat -F'
+    - 'iptables -t mangle -F'
+    - 'iptables -X'
+    - 'ipvsadm -C'
+
+- name: Recreating all pods
+  become_user: "{{ ansible_user }}"
+  shell: "for ns in $(kubectl get ns -o name | cut -f 2 -d '/'); do kubectl delete pods -n $ns --all; done"
+

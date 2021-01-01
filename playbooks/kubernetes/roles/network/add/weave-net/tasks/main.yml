@@ -3,25 +3,12 @@
   become_user: "{{ ansible_user }}"
   shell: kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
 
-# - name: Stopping kubelet
-#   service:
-#     name: kubelet
-#     state: stopped
+- name: Stopping kubelet
+  service:
+    name: kubelet
+    state: stopped
 
-# - name: Cleaning up iptables rules
-#   shell: "iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X"
-
-# - name: Resetting the IPVS tables
-#   shell: "ipvsadm -C"
-
-# - name: Starting kubelet
-#   service:
-#     name: kubelet
-#     state: started
-
-# - name: Running systemctl daemon-reload
-#   shell: "systemctl daemon-reload"
-
-# - name: Recreating all pods to register with the new pod network
-#   become_user: "{{ ansible_user }}"
-#   shell: "for ns in $(kubectl get ns -o name | cut -f 2 -d '/'); do kubectl delete pods -n $ns --all; done"
+- name: Starting kubelet
+  service:
+    name: kubelet
+    state: started
