@@ -36,6 +36,12 @@
     - { role: network/remove/configs/weave-net, tags: remove_weave_net_configs }
     - { role: network/remove/configs/flannel, tags: remove_flannel_configs }
     - { role: network/remove/configs/canal, tags: remove_canal_configs }
+
+- hosts: all
+  become: true
+  gather_facts: false
+  roles:
+    - { role: network/reset, tags: reset_network }
     - { role: network/cni_plugins, tags: build_cni_plugins }
 
 - hosts: all

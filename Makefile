@@ -30,15 +30,13 @@ uninstall_docker:
 	$(call docker_run_ansible_with_tags,docker,site,uninstall)
 	$(call docker_run_ansible,utils,uninstall)
 
-install_kubernetes_prerequisites:
+install_kubernetes_prerequisites: install_docker
 	$(call docker_run_ansible,utils,system)
 	$(call docker_run_ansible,utils,disable_swap)
 	$(call docker_run_ansible_with_tags,ubuntu,site,cgroup_enable_memory)
-	install_docker
 
 #  Kubernetes
-install_kubernetes:
-	install_kubernetes_prerequisites
+install_kubernetes: install_kubernetes_prerequisites
 	$(call docker_run_ansible_with_tags,kubernetes,site,install$(comma)endpoint)
 
 uninstall_kubernetes:
@@ -63,17 +61,11 @@ kubeadm_reset_slave_nodes:
 kubeadm_reset_master_nodes:
 	$(call docker_run_ansible_with_tags,kubernetes,site,reset_master_nodes)
 
-kubeadm_reset:
-	kubeadm_reset_slave_nodes
-	kubeadm_reset_master_nodes
+kubeadm_reset: kubeadm_reset_slave_nodes kubeadm_reset_master_nodes
 
-kubeadm_reset_and_init:
-	kubeadm_reset
-	kubeadm_init
+kubeadm_reset_and_init: kubeadm_reset kubeadm_init
 
-kubeadm_reset_and_init_and_join_nodes:
-	kubeadm_reset_and_init
-	kubeadm_join_nodes
+kubeadm_reset_and_init_and_join_nodes: kubeadm_reset_and_init kubeadm_join_nodes
 
 # Networking
 install_weave_net_pod_network:
@@ -97,18 +89,16 @@ delete_canal_pod_network:
 	$(call docker_run_ansible_with_tags,kubernetes,site,remove_canal_resources)
 	$(call docker_run_ansible_with_tags,kubernetes,site,remove_canal_configs)
 
+reset_networking:
+	$(call docker_run_ansible_with_tags,kubernetes,site,reset_network)
+
 build_cni_plugins:
 	$(call docker_run_ansible_with_tags,kubernetes,site,build_cni_plugins)
 
-# Build with networking
-build_kubernetes_cluster_with_flannel:
-	install_kubernetes
-	kubeadm_init
-	install_flannel_pod_network
-	kubeadm_join_nodes
+# Build only cluster
+build_kubernetes_cluster: kubeadm_init
 
-build_kubernetes_cluster_with_weave_net:
-	install_kubernetes
-	kubeadm_init
-	install_weave_net_pod_network
-	kubeadm_join_nodes
+# Build with networking
+build_kubernetes_cluster_with_flannel: install_kubernetes kubeadm_init install_flannel_pod_network kubeadm_join_nodes
+
+build_kubernetes_cluster_with_weave_net: install_kubernetes kubeadm_init install_weave_net_pod_network kubeadm_join_nodes
