@@ -14,11 +14,7 @@
 
     - name: Disable swap on Ubuntu
       tags: disable_ubuntu_swap
-      shell: "{{ item }}"
-      with_items: 
-        - 'swapoff -a'
-        - "sed -i '/swap/s/^/#/' /etc/fstab"
-      warn: false
+      shell: "swapoff -a && sed -i '/swap/s/^/#/' /etc/fstab"
       when: ansible_distribution == 'Ubuntu'
 
     - name: Reboot the machines
