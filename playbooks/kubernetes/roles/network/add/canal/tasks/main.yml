@@ -7,13 +7,13 @@
   template:
     src: x86-64/canal.yaml
     dest: '/etc/kubernetes/canal.yaml'
-  when: "{{ architecture.stdout }} is x86_64"
+  when: architecture.stdout == 'x86_64'
 
 - name: Copy arm64/canal.yaml to /etc/kubernetes
   template:
     src: arm64/canal.yaml
     dest: '/etc/kubernetes/canal.yaml'
-  when: "{{ architecture.stdout }} is arm64"
+  when: architecture.stdout == 'arm64'
 
 - name: Installing canal pod network on cluster
   become_user: "{{ ansible_user }}"
